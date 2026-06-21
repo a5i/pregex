@@ -1,6 +1,6 @@
 //! Unit tests for the `CharSet` codepoint-range structure and its set ops.
 
-use pregex::charset::CharSet;
+use eregex::charset::CharSet;
 
 fn ch(n: u32) -> char {
     char::from_u32(n).unwrap()

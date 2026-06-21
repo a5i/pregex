@@ -13,7 +13,7 @@
 /// regex metacharacters plus spaces and common punctuation are escaped).
 ///
 /// ```
-/// assert_eq!(pregex::escape("a.b*c"), r"a\.b\*c");
+/// assert_eq!(eregex::escape("a.b*c"), r"a\.b\*c");
 /// ```
 pub fn escape(s: &str) -> String {
     escape_impl(s, false, false)
@@ -23,7 +23,7 @@ pub fn escape(s: &str) -> String {
 /// non-special punctuation alone (mrab's `special_only=True`).
 ///
 /// ```
-/// assert_eq!(pregex::escape_special_only("a.b!"), r"a\.b!");
+/// assert_eq!(eregex::escape_special_only("a.b!"), r"a\.b!");
 /// ```
 pub fn escape_special_only(s: &str) -> String {
     escape_impl(s, true, false)

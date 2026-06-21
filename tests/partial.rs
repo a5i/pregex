@@ -17,7 +17,7 @@
 //! reached. The engine therefore reports it as [`GroupMatch::None`] rather than
 //! `Partial("")` — this is the truthful result and is asserted below.
 
-use pregex::Regex;
+use eregex::Regex;
 
 fn re(p: &str) -> Regex {
     Regex::new(p).unwrap_or_else(|_| panic!("failed to compile {p:?}"))

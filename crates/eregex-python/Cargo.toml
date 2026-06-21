@@ -1,17 +1,17 @@
 [package]
-name = "pregex-python"
-version = "0.1.0"
+name = "eregex-python"
+version.workspace = true
 edition = "2021"
 rust-version = "1.85"
-authors = ["pregex contributors"]
-description = "Python bindings for pregex (pyo3)"
+authors = ["eregex contributors"]
+description = "Python bindings for eregex (pyo3)"
 license = "Apache-2.0"
 publish = false
 
 [lib]
-name = "pregex_python"
+name = "eregex_python"
 crate-type = ["cdylib"]
 
 [dependencies]
-pregex = { path = "../..", version = "0.1.0" }
+eregex = { path = "../..", version = "0.1.0" }
 pyo3 = { version = "0.29", features = ["extension-module", "abi3-py39"] }

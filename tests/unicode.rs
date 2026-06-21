@@ -1,6 +1,6 @@
-//! Unit tests for `pregex::unicode` helpers and the `\p{...}` property table.
+//! Unit tests for `eregex::unicode` helpers and the `\p{...}` property table.
 
-use pregex::unicode;
+use eregex::unicode;
 
 #[test]
 fn is_digit_ascii_vs_unicode() {

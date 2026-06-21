@@ -1,7 +1,7 @@
-//! Node.js bindings for the [`pregex`](https://docs.rs/pregex) regular
+//! Node.js bindings for the [`eregex`](https://docs.rs/eregex) regular
 //! expression engine, generated with [napi-rs](https://napi.rs).
 //!
-//! This crate is a thin adapter: all matching logic lives in the `pregex`
+//! This crate is a thin adapter: all matching logic lives in the `eregex`
 //! core crate, and here we only translate its Rust types into JavaScript-
 //! friendly classes, objects and functions. See `README.md` for a usage
 //! overview.
@@ -22,39 +22,39 @@ use napi_derive::napi;
 // ===========================================================================
 
 /// `(?i)` — case-insensitive matching. Combine with bitwise OR, e.g.
-/// `pregex.IGNORECASE | pregex.MULTILINE`.
+/// `eregex.IGNORECASE | eregex.MULTILINE`.
 #[napi]
-pub const IGNORECASE: u32 = pregex::flags::IGNORECASE.bits();
+pub const IGNORECASE: u32 = eregex::flags::IGNORECASE.bits();
 /// `(?m)` — `^` and `$` match at line boundaries.
 #[napi]
-pub const MULTILINE: u32 = pregex::flags::MULTILINE.bits();
+pub const MULTILINE: u32 = eregex::flags::MULTILINE.bits();
 /// `(?s)` — `.` matches any character including newlines.
 #[napi]
-pub const DOTALL: u32 = pregex::flags::DOTALL.bits();
+pub const DOTALL: u32 = eregex::flags::DOTALL.bits();
 /// `(?u)` — use Unicode semantics for `\d \w \s \b` (the default).
 #[napi]
-pub const UNICODE: u32 = pregex::flags::UNICODE.bits();
+pub const UNICODE: u32 = eregex::flags::UNICODE.bits();
 /// `(?a)` — use ASCII-only semantics for `\d \w \s \b`.
 #[napi]
-pub const ASCII: u32 = pregex::flags::ASCII.bits();
+pub const ASCII: u32 = eregex::flags::ASCII.bits();
 /// `(?x)` — free-spacing mode; whitespace and `#` comments are ignored.
 #[napi]
-pub const VERBOSE: u32 = pregex::flags::VERBOSE.bits();
+pub const VERBOSE: u32 = eregex::flags::VERBOSE.bits();
 /// `(?f)` — full case-folding for case-insensitive matches.
 #[napi]
-pub const FULLCASE: u32 = pregex::flags::FULLCASE.bits();
+pub const FULLCASE: u32 = eregex::flags::FULLCASE.bits();
 /// `(?w)` — Unicode default word-boundary semantics for `\b`/`\B`.
 #[napi]
-pub const WORD: u32 = pregex::flags::WORD.bits();
+pub const WORD: u32 = eregex::flags::WORD.bits();
 /// `(?L)` — locale-sensitive (legacy, limited support).
 #[napi]
-pub const LOCALE: u32 = pregex::flags::LOCALE.bits();
+pub const LOCALE: u32 = eregex::flags::LOCALE.bits();
 /// `(?V0)` — version 0 (legacy `re`-compatible) behaviour.
 #[napi]
-pub const VERSION0: u32 = pregex::flags::VERSION0.bits();
+pub const VERSION0: u32 = eregex::flags::VERSION0.bits();
 /// `(?V1)` — version 1 (enhanced) behaviour (the default).
 #[napi]
-pub const VERSION1: u32 = pregex::flags::VERSION1.bits();
+pub const VERSION1: u32 = eregex::flags::VERSION1.bits();
 
 /// Convert a flag string such as `"ims"` into a flags bitset (a bitwise OR of
 /// the exported `IGNORECASE` / `MULTILINE` / ... constants).
@@ -65,18 +65,18 @@ pub const VERSION1: u32 = pregex::flags::VERSION1.bits();
 /// @throws {Error} on an unknown flag character.
 #[napi]
 pub fn parse_flags(flag_str: String) -> Result<u32> {
-    let mut f = pregex::Flags::NONE;
+    let mut f = eregex::Flags::NONE;
     for c in flag_str.chars() {
         match c.to_ascii_lowercase() {
-            'i' => f |= pregex::flags::IGNORECASE,
-            'm' => f |= pregex::flags::MULTILINE,
-            's' => f |= pregex::flags::DOTALL,
-            'u' => f |= pregex::flags::UNICODE,
-            'a' => f |= pregex::flags::ASCII,
-            'x' => f |= pregex::flags::VERBOSE,
-            'f' => f |= pregex::flags::FULLCASE,
-            'w' => f |= pregex::flags::WORD,
-            'l' => f |= pregex::flags::LOCALE,
+            'i' => f |= eregex::flags::IGNORECASE,
+            'm' => f |= eregex::flags::MULTILINE,
+            's' => f |= eregex::flags::DOTALL,
+            'u' => f |= eregex::flags::UNICODE,
+            'a' => f |= eregex::flags::ASCII,
+            'x' => f |= eregex::flags::VERBOSE,
+            'f' => f |= eregex::flags::FULLCASE,
+            'w' => f |= eregex::flags::WORD,
+            'l' => f |= eregex::flags::LOCALE,
             'g' | 'y' | 'd' => {}
             other => {
                 return Err(Error::from_reason(format!(
@@ -100,20 +100,20 @@ pub fn parse_flags(flag_str: String) -> Result<u32> {
 /// `findPartial`, `replace`, `replaceAll`, and `split`.
 #[napi]
 pub struct Regex {
-    re: pregex::Regex,
+    re: eregex::Regex,
 }
 
 #[napi]
 impl Regex {
     /// Compile `pattern`. `flags` (optional) is a bitwise OR of the
-    /// `pregex.IGNORECASE` / `MULTILINE` / ... constants (or the result of
-    /// `pregex.parseFlags("ims")`).
+    /// `eregex.IGNORECASE` / `MULTILINE` / ... constants (or the result of
+    /// `eregex.parseFlags("ims")`).
     ///
     /// @throws {Error} if `pattern` is syntactically invalid.
     #[napi(constructor)]
     pub fn new(pattern: String, flags: Option<u32>) -> Result<Self> {
-        let f = pregex::Flags(flags.unwrap_or(0));
-        let re = pregex::Regex::new_with_flags(&pattern, f)
+        let f = eregex::Flags(flags.unwrap_or(0));
+        let re = eregex::Regex::new_with_flags(&pattern, f)
             .map_err(|e| Error::from_reason(e.to_string()))?;
         Ok(Self { re })
     }
@@ -255,9 +255,9 @@ pub struct Match {
 }
 
 impl Match {
-    /// Build a JS `Match` from a borrowed `pregex::Match`. All data is cloned
+    /// Build a JS `Match` from a borrowed `eregex::Match`. All data is cloned
     /// into owned form so the JS object is self-contained.
-    fn from_match(haystack: &str, m: &pregex::Match, names: &HashMap<String, usize>) -> Self {
+    fn from_match(haystack: &str, m: &eregex::Match, names: &HashMap<String, usize>) -> Self {
         let n = m.len();
         let groups = (0..n).map(|g| m.group(g).map(str::to_string)).collect();
         let spans = (0..n)
@@ -448,8 +448,8 @@ pub struct PartialMatch {
 }
 
 impl PartialMatch {
-    fn from_partial(p: pregex::PartialMatch, names: &HashMap<String, usize>) -> Self {
-        let status_full = matches!(p.status, pregex::MatchStatus::Full);
+    fn from_partial(p: eregex::PartialMatch, names: &HashMap<String, usize>) -> Self {
+        let status_full = matches!(p.status, eregex::MatchStatus::Full);
         let matched = p.matched.to_string();
         let start = p.start;
         let end = p.end;
@@ -457,15 +457,15 @@ impl PartialMatch {
         let mut group_text = Vec::with_capacity(p.groups.len());
         for g in &p.groups {
             match g {
-                pregex::GroupMatch::Matched(s) => {
+                eregex::GroupMatch::Matched(s) => {
                     states.push(0);
                     group_text.push(Some(s.to_string()));
                 }
-                pregex::GroupMatch::Partial(s) => {
+                eregex::GroupMatch::Partial(s) => {
                     states.push(1);
                     group_text.push(Some(s.to_string()));
                 }
-                pregex::GroupMatch::None => {
+                eregex::GroupMatch::None => {
                     states.push(2);
                     group_text.push(None);
                 }
@@ -565,20 +565,20 @@ impl PartialMatch {
 /// Escape `s` so it matches literally as a regex pattern (aggressive mode).
 #[napi]
 pub fn escape(s: String) -> String {
-    pregex::escape(&s)
+    eregex::escape(&s)
 }
 
 /// Like `escape` but only escapes regex metacharacters, leaving other
 /// punctuation alone.
 #[napi]
 pub fn escape_special_only(s: String) -> String {
-    pregex::escape_special_only(&s)
+    eregex::escape_special_only(&s)
 }
 
 /// Like `escape` but leaves spaces unescaped.
 #[napi]
 pub fn escape_literal_spaces(s: String) -> String {
-    pregex::escape_literal_spaces(&s)
+    eregex::escape_literal_spaces(&s)
 }
 
 /// Convenience: `true` if `pattern` matches anywhere in `haystack`.
@@ -586,6 +586,6 @@ pub fn escape_literal_spaces(s: String) -> String {
 /// @throws {Error} if `pattern` is syntactically invalid.
 #[napi]
 pub fn is_match(pattern: String, haystack: String) -> Result<bool> {
-    let re = pregex::Regex::new(&pattern).map_err(|e| Error::from_reason(e.to_string()))?;
+    let re = eregex::Regex::new(&pattern).map_err(|e| Error::from_reason(e.to_string()))?;
     Ok(re.is_match(&haystack))
 }

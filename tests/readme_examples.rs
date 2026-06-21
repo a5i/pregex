@@ -6,7 +6,7 @@
 //! the test asserts that the parser or API *gracefully rejects* the syntax
 //! with a clear error message, so silent wrong answers are impossible.
 
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 // ===========================================================================
 // §1  Lookaround in conditional pattern  (?(?=\d)\d+|\w+)
@@ -198,7 +198,7 @@ fn readme_set_operators_rejected() {
 // ---------------------------------------------------------------------------
 #[test]
 fn readme_escape_special_only_exact() {
-    use pregex::escape_special_only;
+    use eregex::escape_special_only;
     // README: escape("foo!?", special_only=True) == 'foo!\?'
     assert_eq!(escape_special_only("foo!?"), "foo!\\?");
 }
@@ -208,7 +208,7 @@ fn readme_escape_special_only_exact() {
 // ---------------------------------------------------------------------------
 #[test]
 fn readme_escape_literal_spaces_exact() {
-    use pregex::escape_literal_spaces;
+    use eregex::escape_literal_spaces;
     // README: escape("foo bar!?", literal_spaces=True) == 'foo bar!\?'
     assert_eq!(escape_literal_spaces("foo bar!?"), "foo bar!\\?");
 }

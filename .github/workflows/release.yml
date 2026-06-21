@@ -7,10 +7,10 @@ name: release
 #   * CARGO_REGISTRY_TOKEN  -> https://crates.io settings (or switch to Trusted Publishing)
 #   * NPM_TOKEN             -> https://npmjs.com access token (Automation / Granular)
 #   * PyPI Trusted Publishing: register this workflow + `pypi` environment at
-#     https://pypi.org/manage/project/pregex/settings/publishing/
+#     https://pypi.org/manage/project/eregex/settings/publishing/
 #
 # All three manifests must report the same version as the tag:
-#   Cargo.toml, crates/pregex-node/package.json, crates/pregex-python/pyproject.toml
+#   Cargo.toml, crates/eregex-node/package.json, crates/eregex-python/pyproject.toml
 
 on:
   push:
@@ -37,15 +37,32 @@ jobs:
           set -euo pipefail
           TAG="${GITHUB_REF_NAME#v}"
 
-          CRATE_VERSION=$(grep -m1 '^version =' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-          NODE_VERSION=$(grep -m1 '"version"' crates/pregex-node/package.json | sed 's/.*: "\(.*\)".*/\1/' | tr -d ',')
-          PY_VERSION=$(grep -m1 '^version =' crates/pregex-python/pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          # The single source of truth is `[workspace.package].version` in the
+          # root Cargo.toml; every member crate inherits it via
+          # `version.workspace = true`. We extract that one value and confirm
+          # each crate is actually inheriting (no literal version overriding it).
+          WS_VERSION=$(awk '
+            /^\[workspace\.package\]/ { in_ws=1; next }
+            /^\[/                      { in_ws=0 }
+            in_ws && /^version *=/      { gsub(/version *= *"|"$/, ""); print; exit }
+          ' Cargo.toml)
 
-          echo "tag=$TAG crate=$CRATE_VERSION node=$NODE_VERSION python=$PY_VERSION"
+          NODE_VERSION=$(grep -m1 '"version"' crates/eregex-node/package.json | sed 's/.*: "\(.*\)".*/\1/' | tr -d ',')
+          PY_VERSION=$(grep -m1 '^version =' crates/eregex-python/pyproject.toml | sed 's/version = "\(.*\)"/\1/')
 
-          test "$TAG" = "$CRATE_VERSION"
-          test "$TAG" = "$NODE_VERSION"
-          test "$TAG" = "$PY_VERSION"
+          echo "tag=$TAG"
+          echo "cargo (workspace) = $WS_VERSION"
+          echo "npm               = $NODE_VERSION"
+          echo "pypi              = $PY_VERSION"
+
+          # Every Cargo crate must inherit the workspace version (no literals).
+          grep -q '^version\.workspace = true$' Cargo.toml
+          grep -q '^version\.workspace = true$' crates/eregex-node/Cargo.toml
+          grep -q '^version\.workspace = true$' crates/eregex-python/Cargo.toml
+
+          test "$WS_VERSION" = "$TAG"
+          test "$NODE_VERSION" = "$TAG"
+          test "$PY_VERSION" = "$TAG"
 
   test:
     name: Test Rust core
@@ -73,7 +90,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Publish
-        run: cargo publish -p pregex
+        run: cargo publish -p eregex
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
@@ -101,14 +118,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: crates/pregex-node/package-lock.json
+          cache-dependency-path: crates/eregex-node/package-lock.json
 
       - name: Install dependencies
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm ci
 
       - name: Build native addon
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npx napi build --release --platform --target ${{ matrix.target }}
 
       - name: Upload artifacts
@@ -116,9 +133,9 @@ jobs:
         with:
           name: node-${{ matrix.target }}
           path: |
-            crates/pregex-node/*.node
-            crates/pregex-node/index.js
-            crates/pregex-node/index.d.ts
+            crates/eregex-node/*.node
+            crates/eregex-node/index.js
+            crates/eregex-node/index.d.ts
 
   publish-node:
     name: Publish to npm
@@ -132,21 +149,21 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
           cache: npm
-          cache-dependency-path: crates/pregex-node/package-lock.json
+          cache-dependency-path: crates/eregex-node/package-lock.json
 
       - name: Install dependencies
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm ci
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: node-*
-          path: crates/pregex-node
+          path: crates/eregex-node
           merge-multiple: true
 
       - name: Publish
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -167,7 +184,7 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --manifest-path crates/pregex-python/Cargo.toml --out dist
+          args: --release --manifest-path crates/eregex-python/Cargo.toml --out dist
           manylinux: auto
 
       - name: Upload wheels

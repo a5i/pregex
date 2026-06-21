@@ -1,10 +1,10 @@
 //! Edge cases: escapes, quantifier corners, parser errors, replace templates,
 //! and subtle matcher behaviour.
 
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 /// Re-export the error kind for assertions.
-use pregex::error::ErrorKind;
+use eregex::error::ErrorKind;
 
 fn re(p: &str) -> Regex {
     Regex::new(p).unwrap()
@@ -214,7 +214,7 @@ fn error_carries_position() {
 #[test]
 fn error_display_contains_message() {
     let e = Regex::new(r"(abc").unwrap_err();
-    assert!(e.to_string().contains("pregex error"));
+    assert!(e.to_string().contains("eregex error"));
     assert!(e.to_string().contains("position"));
 }
 

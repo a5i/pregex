@@ -1,10 +1,10 @@
-# pregex (Node.js bindings)
+# eregex (Node.js bindings)
 
-Native Node.js bindings for [`pregex`](https://github.com/mrabarnett/mrab-regex) —
+Native Node.js bindings for [`eregex`](https://github.com/mrabarnett/mrab-regex) —
 an advanced regular expression engine for Rust inspired by mrab-regex (the
 Python `regex` module).
 
-This package exposes pregex's full API to JavaScript / TypeScript via
+This package exposes eregex's full API to JavaScript / TypeScript via
 [napi-rs](https://napi.rs). All matching logic runs in compiled Rust; the
 JavaScript layer is a thin adapter.
 
@@ -25,9 +25,9 @@ JavaScript layer is a thin adapter.
 The native addon is built locally from the Rust core:
 
 ```bash
-cd crates/pregex-node
+cd crates/eregex-node
 npm install
-npm run build        # release build → index.js + pregex.<platform>.node
+npm run build        # release build → index.js + eregex.<platform>.node
 # or: npm run build:debug
 ```
 
@@ -37,7 +37,7 @@ they are not checked in.
 ## Quick start
 
 ```js
-const { Regex, IGNORECASE, parseFlags } = require('pregex');
+const { Regex, IGNORECASE, parseFlags } = require('eregex');
 
 const re = new Regex(String.raw`(\w+)\s+(\w+)`);
 const m = re.find('hello world');
@@ -166,7 +166,7 @@ npm test    # runs test/smoke.js
 
 ## Layout
 
-This is one half of pregex's binding story. The same Rust core (`pregex`)
+This is one half of eregex's binding story. The same Rust core (`eregex`)
 also ships Python bindings via `pyo3` + `maturin`. See the project root for
 the core crate and its feature matrix.
 

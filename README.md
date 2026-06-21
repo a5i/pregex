@@ -1,10 +1,10 @@
-# pregex
+# eregex
 
 An advanced regular expression engine for Rust, inspired by
 [mrab-regex](https://github.com/mrabarnett/mrab-regex) (the Python `regex`
 module).
 
-`pregex` aims to bring the richer feature set of `mrab-regex` to Rust:
+`eregex` aims to bring the richer feature set of `mrab-regex` to Rust:
 
 * Named groups, duplicate group names, repeated captures
 * Greedy / lazy / possessive quantifiers
@@ -24,7 +24,7 @@ below for what is ready today and what is on the roadmap.
 ## Quick start
 
 ```rust
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 let re = Regex::new(r"(\w+)\s+(\w+)").unwrap();
 let m = re.find("hello world").unwrap();
@@ -89,33 +89,33 @@ assert!(re.find_partial("xxx token=abc!").is_none());
 
 ## Core concepts
 
-* [`Regex`](https://docs.rs/pregex/latest/pregex/struct.Regex.html) — a
+* [`Regex`](https://docs.rs/eregex/latest/eregex/struct.Regex.html) — a
   compiled pattern. Compile once with [`Regex::new`] (or
   [`Regex::new_with_flags`]), then search many inputs.
-* [`Match`](https://docs.rs/pregex/latest/pregex/struct.Match.html) — a
+* [`Match`](https://docs.rs/eregex/latest/eregex/struct.Match.html) — a
   successful full match, with group lookup by index or name and full repeated-
   capture history.
-* [`PartialMatch`](https://docs.rs/pregex/latest/pregex/struct.PartialMatch.html) —
+* [`PartialMatch`](https://docs.rs/eregex/latest/eregex/struct.PartialMatch.html) —
   the result of [`Regex::find_partial`], carrying a [`MatchStatus`] of `Full`
   or `Partial` and per-group [`GroupMatch`] state.
-* [`Flags`](https://docs.rs/pregex/latest/pregex/flags/struct.Flags.html) and
-  the [`flags`](https://docs.rs/pregex/latest/pregex/flags/index.html) module —
+* [`Flags`](https://docs.rs/eregex/latest/eregex/flags/struct.Flags.html) and
+  the [`flags`](https://docs.rs/eregex/latest/eregex/flags/index.html) module —
   compile-time flags (`IGNORECASE`, `MULTILINE`, `DOTALL`, …) and their inline
   `(?im)` syntax.
 
 ## Error handling
 
-All fallible operations return [`Result<T, Error>`](https://docs.rs/pregex/latest/pregex/error/type.Result.html).
-[`Error`](https://docs.rs/pregex/latest/pregex/error/struct.Error.html) carries
-an [`ErrorKind`](https://docs.rs/pregex/latest/pregex/error/enum.ErrorKind.html)
+All fallible operations return [`Result<T, Error>`](https://docs.rs/eregex/latest/eregex/error/type.Result.html).
+[`Error`](https://docs.rs/eregex/latest/eregex/error/struct.Error.html) carries
+an [`ErrorKind`](https://docs.rs/eregex/latest/eregex/error/enum.ErrorKind.html)
 (syntax error, bad escape, bad quantifier, unknown group, …) plus the byte
 offset in the pattern where the problem was detected, when known.
 
 ```rust
-use pregex::Regex;
+use eregex::Regex;
 
 let err = Regex::new(r"(").unwrap_err();
-println!("{}", err); // e.g. "pregex error at position 1: unclosed group"
+println!("{}", err); // e.g. "eregex error at position 1: unclosed group"
 ```
 
 ## Examples
@@ -150,8 +150,8 @@ Bypass it for a single commit with `git commit --no-verify`.
 
 Apache-2.0, matching the upstream `mrab-regex` project.
 
-[`Regex::new`]: https://docs.rs/pregex/latest/pregex/struct.Regex.html#method.new
-[`Regex::new_with_flags`]: https://docs.rs/pregex/latest/pregex/struct.Regex.html#method.new_with_flags
-[`Regex::find_partial`]: https://docs.rs/pregex/latest/pregex/struct.Regex.html#method.find_partial
-[`MatchStatus`]: https://docs.rs/pregex/latest/pregex/enum.MatchStatus.html
-[`GroupMatch`]: https://docs.rs/pregex/latest/pregex/enum.GroupMatch.html
+[`Regex::new`]: https://docs.rs/eregex/latest/eregex/struct.Regex.html#method.new
+[`Regex::new_with_flags`]: https://docs.rs/eregex/latest/eregex/struct.Regex.html#method.new_with_flags
+[`Regex::find_partial`]: https://docs.rs/eregex/latest/eregex/struct.Regex.html#method.find_partial
+[`MatchStatus`]: https://docs.rs/eregex/latest/eregex/enum.MatchStatus.html
+[`GroupMatch`]: https://docs.rs/eregex/latest/eregex/enum.GroupMatch.html

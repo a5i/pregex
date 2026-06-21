@@ -1,4 +1,4 @@
-//! `pregex` — an advanced regular expression engine for Rust.
+//! `eregex` — an advanced regular expression engine for Rust.
 //!
 //! The full overview, quick-start guide, feature matrix and roadmap live in
 //! the [`README`](https://github.com/mrabarnett/mrab-regex#readme), which is
@@ -40,7 +40,7 @@ pub use regex::Regex;
 /// Compile a pattern with the default flags.
 ///
 /// ```
-/// assert!(pregex::is_match(r"\d+", "abc 123"));
+/// assert!(eregex::is_match(r"\d+", "abc 123"));
 /// ```
 pub fn new(pattern: &str) -> Result<Regex> {
     Regex::new(pattern)

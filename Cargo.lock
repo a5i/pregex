@@ -55,6 +55,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f678cf4a922c215c63e0de95eb1ff08a958a81d47e485cf9da1e27bf6305cfa5"
 
 [[package]]
+name = "eregex"
+version = "0.1.1"
+
+[[package]]
+name = "eregex-node"
+version = "0.1.1"
+dependencies = [
+ "eregex",
+ "napi",
+ "napi-build",
+ "napi-derive",
+]
+
+[[package]]
+name = "eregex-python"
+version = "0.1.1"
+dependencies = [
+ "eregex",
+ "pyo3",
+]
+
+[[package]]
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -149,28 +171,6 @@ name = "portable-atomic"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c33a9471896f1c69cecef8d20cbe2f7accd12527ce60845ff44c153bb2a21b49"
-
-[[package]]
-name = "pregex"
-version = "0.1.0"
-
-[[package]]
-name = "pregex-node"
-version = "0.1.0"
-dependencies = [
- "napi",
- "napi-build",
- "napi-derive",
- "pregex",
-]
-
-[[package]]
-name = "pregex-python"
-version = "0.1.0"
-dependencies = [
- "pregex",
- "pyo3",
-]
 
 [[package]]
 name = "proc-macro2"

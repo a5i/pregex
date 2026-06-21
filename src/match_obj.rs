@@ -15,13 +15,13 @@ use std::collections::HashMap;
 /// # Examples
 ///
 /// ```
-/// use pregex::Regex;
+/// use eregex::Regex;
 /// let re = Regex::new(r"(?P<host>\w+)=(?P<port>\d+)")?;
 /// let m = re.find("srv=8080").unwrap();
 /// assert_eq!(m.name("host"), Some("srv"));
 /// assert_eq!(m.group(2), Some("8080"));
 /// assert_eq!(m.span(), (0, 8));
-/// # Ok::<(), pregex::Error>(())
+/// # Ok::<(), eregex::Error>(())
 /// ```
 pub struct Match<'h> {
     pub(crate) haystack: &'h str,

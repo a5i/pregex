@@ -1,6 +1,6 @@
-//! A small demonstration of the pregex API.
+//! A small demonstration of the eregex API.
 
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 fn main() {
     let re = Regex::new(r"(?P<word>\w+)\s+(?P<num>\d+)").unwrap();

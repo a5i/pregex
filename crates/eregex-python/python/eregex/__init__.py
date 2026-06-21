@@ -1,11 +1,11 @@
-"""pregex — an advanced regular expression engine (Python bindings).
+"""eregex — an advanced regular expression engine (Python bindings).
 
-This package is the public Python API for the Rust `pregex` engine. The native
-extension is built by maturin and lives in the ``pregex.pregex_python``
-submodule; everything is re-exported here for a clean ``import pregex``.
+This package is the public Python API for the Rust `eregex` engine. The native
+extension is built by maturin and lives in the ``eregex.eregex_python``
+submodule; everything is re-exported here for a clean ``import eregex``.
 """
 
-from .pregex_python import (  # noqa: F401
+from .eregex_python import (  # noqa: F401
     ASCII,
     DOTALL,
     FULLCASE,

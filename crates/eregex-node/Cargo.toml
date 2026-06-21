@@ -1,10 +1,10 @@
 [package]
-name = "pregex-node"
-version = "0.1.0"
+name = "eregex-node"
+version.workspace = true
 edition = "2021"
 rust-version = "1.85"
-authors = ["pregex contributors"]
-description = "Node.js bindings for pregex (napi-rs)"
+authors = ["eregex contributors"]
+description = "Node.js bindings for eregex (napi-rs)"
 license = "Apache-2.0"
 publish = false
 
@@ -12,7 +12,7 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-pregex = { path = "../..", version = "0.1.0" }
+eregex = { path = "../..", version = "0.1.0" }
 napi = { version = "3", default-features = false, features = ["napi3"] }
 napi-derive = "3"
 

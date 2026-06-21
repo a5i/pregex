@@ -1,7 +1,7 @@
-//! Python bindings for the [`pregex`](https://docs.rs/pregex) regular
+//! Python bindings for the [`eregex`](https://docs.rs/eregex) regular
 //! expression engine, generated with [PyO3](https://pyo3.rs).
 //!
-//! This crate is a thin adapter: all matching logic lives in the `pregex`
+//! This crate is a thin adapter: all matching logic lives in the `eregex`
 //! core crate, and here we only translate its Rust types into Python-friendly
 //! classes and functions. The wheel is built with
 //! [`maturin`](https://www.maturin.rs); see `README.md` for usage.
@@ -18,8 +18,8 @@ use pyo3::types::{PyDict, PyTuple};
 // Error helper + conversion helpers
 // ===========================================================================
 
-/// Map a `pregex::Error` into a `ValueError` carrying its display string.
-fn map_err(e: pregex::Error) -> PyErr {
+/// Map a `eregex::Error` into a `ValueError` carrying its display string.
+fn map_err(e: eregex::Error) -> PyErr {
     PyValueError::new_err(e.to_string())
 }
 
@@ -65,7 +65,7 @@ fn normalize_index(i: isize, len: usize) -> PyResult<usize> {
 /// :meth:`split`.
 #[pyclass(frozen, name = "Regex")]
 pub struct PyRegex {
-    re: pregex::Regex,
+    re: eregex::Regex,
 }
 
 #[pymethods]
@@ -77,8 +77,8 @@ impl PyRegex {
     #[new]
     #[pyo3(signature = (pattern, flags=None))]
     fn new(pattern: &str, flags: Option<u32>) -> PyResult<Self> {
-        let f = pregex::Flags(flags.unwrap_or(0));
-        let re = pregex::Regex::new_with_flags(pattern, f).map_err(map_err)?;
+        let f = eregex::Flags(flags.unwrap_or(0));
+        let re = eregex::Regex::new_with_flags(pattern, f).map_err(map_err)?;
         Ok(Self { re })
     }
 
@@ -217,9 +217,9 @@ pub struct PyMatch {
 }
 
 impl PyMatch {
-    /// Build a Python `Match` from a borrowed `pregex::Match`. All data is
+    /// Build a Python `Match` from a borrowed `eregex::Match`. All data is
     /// cloned into owned form so the Python object is self-contained.
-    fn from_match(haystack: &str, m: &pregex::Match, names: &HashMap<String, usize>) -> Self {
+    fn from_match(haystack: &str, m: &eregex::Match, names: &HashMap<String, usize>) -> Self {
         let n = m.len();
         let groups = (0..n).map(|g| m.group(g).map(str::to_string)).collect();
         let spans = (0..n)
@@ -465,8 +465,8 @@ pub struct PyPartialMatch {
 }
 
 impl PyPartialMatch {
-    fn from_partial(p: pregex::PartialMatch, names: &HashMap<String, usize>) -> Self {
-        let status_full = matches!(p.status, pregex::MatchStatus::Full);
+    fn from_partial(p: eregex::PartialMatch, names: &HashMap<String, usize>) -> Self {
+        let status_full = matches!(p.status, eregex::MatchStatus::Full);
         let matched = p.matched.to_string();
         let start = p.start;
         let end = p.end;
@@ -474,15 +474,15 @@ impl PyPartialMatch {
         let mut group_text = Vec::with_capacity(p.groups.len());
         for g in &p.groups {
             match g {
-                pregex::GroupMatch::Matched(s) => {
+                eregex::GroupMatch::Matched(s) => {
                     states.push(0);
                     group_text.push(Some(s.to_string()));
                 }
-                pregex::GroupMatch::Partial(s) => {
+                eregex::GroupMatch::Partial(s) => {
                     states.push(1);
                     group_text.push(Some(s.to_string()));
                 }
-                pregex::GroupMatch::None => {
+                eregex::GroupMatch::None => {
                     states.push(2);
                     group_text.push(None);
                 }
@@ -590,20 +590,20 @@ impl PyPartialMatch {
 /// Escape ``s`` so it matches literally as a regex pattern (aggressive mode).
 #[pyfunction(name = "escape")]
 fn py_escape(s: &str) -> String {
-    pregex::escape(s)
+    eregex::escape(s)
 }
 
 /// Like :func:`escape` but only escapes regex metacharacters, leaving other
 /// punctuation alone.
 #[pyfunction(name = "escape_special_only")]
 fn py_escape_special_only(s: &str) -> String {
-    pregex::escape_special_only(s)
+    eregex::escape_special_only(s)
 }
 
 /// Like :func:`escape` but leaves spaces unescaped.
 #[pyfunction(name = "escape_literal_spaces")]
 fn py_escape_literal_spaces(s: &str) -> String {
-    pregex::escape_literal_spaces(s)
+    eregex::escape_literal_spaces(s)
 }
 
 /// Convenience: ``True`` if ``pattern`` matches anywhere in ``haystack``.
@@ -611,7 +611,7 @@ fn py_escape_literal_spaces(s: &str) -> String {
 /// :raises ValueError: if ``pattern`` is syntactically invalid.
 #[pyfunction(name = "is_match")]
 fn py_is_match(pattern: &str, haystack: &str) -> PyResult<bool> {
-    let re = pregex::Regex::new(pattern).map_err(map_err)?;
+    let re = eregex::Regex::new(pattern).map_err(map_err)?;
     Ok(re.is_match(haystack))
 }
 
@@ -625,18 +625,18 @@ fn py_is_match(pattern: &str, haystack: &str) -> PyResult<bool> {
 /// :raises ValueError: on an unknown flag character.
 #[pyfunction(name = "parse_flags")]
 fn py_parse_flags(flag_str: &str) -> PyResult<u32> {
-    let mut f = pregex::Flags::NONE;
+    let mut f = eregex::Flags::NONE;
     for c in flag_str.chars() {
         match c.to_ascii_lowercase() {
-            'i' => f |= pregex::flags::IGNORECASE,
-            'm' => f |= pregex::flags::MULTILINE,
-            's' => f |= pregex::flags::DOTALL,
-            'u' => f |= pregex::flags::UNICODE,
-            'a' => f |= pregex::flags::ASCII,
-            'x' => f |= pregex::flags::VERBOSE,
-            'f' => f |= pregex::flags::FULLCASE,
-            'w' => f |= pregex::flags::WORD,
-            'l' => f |= pregex::flags::LOCALE,
+            'i' => f |= eregex::flags::IGNORECASE,
+            'm' => f |= eregex::flags::MULTILINE,
+            's' => f |= eregex::flags::DOTALL,
+            'u' => f |= eregex::flags::UNICODE,
+            'a' => f |= eregex::flags::ASCII,
+            'x' => f |= eregex::flags::VERBOSE,
+            'f' => f |= eregex::flags::FULLCASE,
+            'w' => f |= eregex::flags::WORD,
+            'l' => f |= eregex::flags::LOCALE,
             'g' | 'y' | 'd' => {}
             other => {
                 return Err(PyValueError::new_err(format!(
@@ -661,14 +661,14 @@ fn py_compile(pattern: &str, flags: Option<u32>) -> PyResult<PyRegex> {
 // Module
 // ===========================================================================
 
-/// pregex — an advanced regular expression engine (Python bindings).
+/// eregex — an advanced regular expression engine (Python bindings).
 ///
-/// This module exposes the Rust `pregex` engine to Python. Compile a pattern
+/// This module exposes the Rust `eregex` engine to Python. Compile a pattern
 /// with :class:`Regex`, then use methods like :meth:`Regex.find`,
 /// :meth:`Regex.is_match`, :meth:`Regex.find_partial`, :meth:`Regex.replace`
 /// / :meth:`Regex.replace_all`, and :meth:`Regex.split`.
 #[pymodule]
-fn pregex_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn eregex_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_escape, m)?)?;
     m.add_function(wrap_pyfunction!(py_escape_special_only, m)?)?;
     m.add_function(wrap_pyfunction!(py_escape_literal_spaces, m)?)?;
@@ -682,17 +682,17 @@ fn pregex_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Flag constants. `flags` returns resolved flags (with defaults
     // UNICODE + VERSION1 added), so users compare via bitwise AND.
-    m.add("IGNORECASE", pregex::flags::IGNORECASE.bits())?;
-    m.add("MULTILINE", pregex::flags::MULTILINE.bits())?;
-    m.add("DOTALL", pregex::flags::DOTALL.bits())?;
-    m.add("UNICODE", pregex::flags::UNICODE.bits())?;
-    m.add("ASCII", pregex::flags::ASCII.bits())?;
-    m.add("VERBOSE", pregex::flags::VERBOSE.bits())?;
-    m.add("FULLCASE", pregex::flags::FULLCASE.bits())?;
-    m.add("WORD", pregex::flags::WORD.bits())?;
-    m.add("LOCALE", pregex::flags::LOCALE.bits())?;
-    m.add("VERSION0", pregex::flags::VERSION0.bits())?;
-    m.add("VERSION1", pregex::flags::VERSION1.bits())?;
+    m.add("IGNORECASE", eregex::flags::IGNORECASE.bits())?;
+    m.add("MULTILINE", eregex::flags::MULTILINE.bits())?;
+    m.add("DOTALL", eregex::flags::DOTALL.bits())?;
+    m.add("UNICODE", eregex::flags::UNICODE.bits())?;
+    m.add("ASCII", eregex::flags::ASCII.bits())?;
+    m.add("VERBOSE", eregex::flags::VERBOSE.bits())?;
+    m.add("FULLCASE", eregex::flags::FULLCASE.bits())?;
+    m.add("WORD", eregex::flags::WORD.bits())?;
+    m.add("LOCALE", eregex::flags::LOCALE.bits())?;
+    m.add("VERSION0", eregex::flags::VERSION0.bits())?;
+    m.add("VERSION1", eregex::flags::VERSION1.bits())?;
 
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())

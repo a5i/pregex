@@ -1,10 +1,10 @@
-# pregex (Python bindings)
+# eregex (Python bindings)
 
-Python bindings for [`pregex`](https://github.com/mrabarnett/mrab-regex) — an
+Python bindings for [`eregex`](https://github.com/mrabarnett/mrab-regex) — an
 advanced regular expression engine for Rust inspired by mrab-regex (the Python
 `regex` module).
 
-This package exposes pregex's full API to Python via [PyO3](https://pyo3.rs)
+This package exposes eregex's full API to Python via [PyO3](https://pyo3.rs)
 and ships as a wheel built with [maturin](https://www.maturin.rs). All
 matching logic runs in compiled Rust; the Python layer is a thin adapter.
 
@@ -25,23 +25,23 @@ matching logic runs in compiled Rust; the Python layer is a thin adapter.
 The wheel is built from the Rust core:
 
 ```bash
-cd crates/pregex-python
+cd crates/eregex-python
 python -m venv .venv
 . .venv/bin/activate          # or .venv\Scripts\activate on Windows
 pip install maturin
 maturin develop --release     # editable install into the current venv
-# or: maturin build --release && pip install target/wheels/pregex-*.whl
+# or: maturin build --release && pip install target/wheels/eregex-*.whl
 ```
 
-`maturin develop` installs an `import pregex` module into the active virtual
-environment (the extension is named `pregex`).
+`maturin develop` installs an `import eregex` module into the active virtual
+environment (the extension is named `eregex`).
 
 ## Quick start
 
 ```python
-import pregex
+import eregex
 
-re = pregex.Regex(r"(\w+)\s+(\w+)")
+re = eregex.Regex(r"(\w+)\s+(\w+)")
 m = re.find("hello world")
 m.matched        # 'hello world'
 m.group(1)       # 'hello'
@@ -49,14 +49,14 @@ m.group(2)       # 'world'
 m[1]             # 'hello'  (Match is sequence-like)
 
 # Flags: pass a bitset of the module-level constants, or parse a string.
-pregex.Regex("hello", pregex.IGNORECASE).is_match("HELLO")  # True
-pregex.Regex("hello", pregex.parse_flags("i")).is_match("HELLO")  # True
+eregex.Regex("hello", eregex.IGNORECASE).is_match("HELLO")  # True
+eregex.Regex("hello", eregex.parse_flags("i")).is_match("HELLO")  # True
 
 # Repeated captures (signature mrab-regex feature).
-pregex.Regex(r"(\w)+").find("abc").captures(1)  # ['a', 'b', 'c']
+eregex.Regex(r"(\w)+").find("abc").captures(1)  # ['a', 'b', 'c']
 
 # Replace with named groups.
-pregex.Regex(r"(?P<a>\d)(?P<b>\d)").replace_all("12 34", "${b}${a}")  # '21 43'
+eregex.Regex(r"(?P<a>\d)(?P<b>\d)").replace_all("12 34", "${b}${a}")  # '21 43'
 ```
 
 ## `Regex`
@@ -165,7 +165,7 @@ class PartialMatch:
   (more input could complete it).
 
 ```python
-re = pregex.Regex(r"token=([a-z]+)([0-9]+)")
+re = eregex.Regex(r"token=([a-z]+)([0-9]+)")
 p = re.find_partial("x token=abc")
 p.is_partial           # True
 p.group(1)             # 'abc'
@@ -191,12 +191,12 @@ parse_flags(flag_str: str) -> int
 ```bash
 . .venv/bin/activate
 maturin develop --release
-python -m unittest test_pregex -v
+python -m unittest test_eregex -v
 ```
 
 ## Layout
 
-This is one half of pregex's binding story. The same Rust core (`pregex`)
+This is one half of eregex's binding story. The same Rust core (`eregex`)
 also ships Node.js bindings via `napi-rs`. See the project root for the core
 crate and its feature matrix.
 

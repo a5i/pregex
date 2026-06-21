@@ -1,8 +1,8 @@
-"""Smoke tests for the pregex Python bindings (run with plain unittest)."""
+"""Smoke tests for the eregex Python bindings (run with plain unittest)."""
 
 import unittest
 
-import pregex as P
+import eregex as P
 
 
 class TestConstruction(unittest.TestCase):

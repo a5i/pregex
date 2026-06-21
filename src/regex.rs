@@ -24,13 +24,13 @@ use crate::state::State;
 /// # Examples
 ///
 /// ```
-/// use pregex::{flags, Regex};
+/// use eregex::{flags, Regex};
 ///
 /// let re = Regex::new(r"(\w+)@(\w+)")?;
 /// let m = re.find("ping alice@work").unwrap();
 /// assert_eq!(m.group(1), Some("alice"));
 /// assert_eq!(m.group(2), Some("work"));
-/// # Ok::<(), pregex::Error>(())
+/// # Ok::<(), eregex::Error>(())
 /// ```
 pub struct Regex {
     pattern: String,
@@ -53,12 +53,12 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     ///
     /// let re = Regex::new(r"\d{3}-\d{2}")?;
     /// assert!(re.is_match("123-45"));
     /// assert!(Regex::new(r"(").is_err());
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn new(pattern: &str) -> Result<Regex> {
         Self::new_with_flags(pattern, Flags::NONE)
@@ -73,11 +73,11 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::{flags, Regex};
+    /// use eregex::{flags, Regex};
     ///
     /// let re = Regex::new_with_flags(r"hello", flags::IGNORECASE)?;
     /// assert_eq!(re.find("HELLO, World").unwrap().as_str(), "HELLO");
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn new_with_flags(pattern: &str, flags: Flags) -> Result<Regex> {
         let parsed = crate::parser::parse(pattern, flags)?;
@@ -177,11 +177,11 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\d+")?;
     /// assert!(re.is_match("abc 123"));
     /// assert!(!re.is_match("no digits here"));
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn is_match(&self, haystack: &str) -> bool {
         let mut st = self.build_state(haystack);
@@ -197,13 +197,13 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"([a-z]+)(\d+)")?;
     /// let m = re.find("x abc42 y").unwrap();
     /// assert_eq!(m.as_str(), "abc42");
     /// assert_eq!(m.start(), 2);
     /// assert_eq!(m.group(2), Some("42"));
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn find<'h>(&self, haystack: &'h str) -> Option<Match<'h>> {
         let mut st = self.build_state(haystack);
@@ -220,13 +220,13 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\d+")?;
     /// let hay = "a1 b2 c3";
     /// let first = re.find(hay).unwrap();
     /// let next = re.find_at(hay, first.end()).unwrap();
     /// assert_eq!(next.as_str(), "2");
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn find_at<'h>(&self, haystack: &'h str, start: usize) -> Option<Match<'h>> {
         let mut st = self.build_state(haystack);
@@ -247,11 +247,11 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\d+")?;
     /// assert_eq!(re.match_at_start("123abc").unwrap().as_str(), "123");
     /// assert!(re.match_at_start("abc123").is_none());
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn match_at_start<'h>(&self, haystack: &'h str) -> Option<Match<'h>> {
         let mut st = self.build_state(haystack);
@@ -272,11 +272,11 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\d{3}")?;
     /// assert!(re.fullmatch("123").is_some());
     /// assert!(re.fullmatch("1234").is_none());
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn fullmatch<'h>(&self, haystack: &'h str) -> Option<Match<'h>> {
         let mut st = self.build_state(haystack);
@@ -300,11 +300,11 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\d+")?;
     /// let ms: Vec<_> = re.find_iter("a1 bb 22").map(|m| m.as_str().to_string()).collect();
     /// assert_eq!(ms, vec!["1", "22"]);
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn find_iter<'r, 'h>(&'r self, haystack: &'h str) -> FindIter<'r, 'h> {
         FindIter {
@@ -340,7 +340,7 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::{MatchStatus, Regex};
+    /// use eregex::{MatchStatus, Regex};
     /// let re = Regex::new(r"token=([a-z]+)([0-9]+)")?;
     ///
     /// // Incomplete input — more could turn it into a full match.
@@ -351,7 +351,7 @@ impl Regex {
     ///
     /// // A wrong character rules out any continuation -> no match at all.
     /// assert!(re.find_partial("x token=abc!").is_none());
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn find_partial<'h>(&self, haystack: &'h str) -> Option<PartialMatch<'h>> {
         let mut st = self.build_state(haystack);
@@ -449,10 +449,10 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"(\w+) (\w+)")?;
     /// assert_eq!(re.replace("hello world", "$2 $1"), "world hello");
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn replace(&self, haystack: &str, repl: &str) -> String {
         let mut st = self.build_state(haystack);
@@ -478,10 +478,10 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"(?P<a>\d)(?P<b>\d)")?;
     /// assert_eq!(re.replace_all("12 34", "${b}${a}"), "21 43");
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn replace_all(&self, haystack: &str, repl: &str) -> String {
         let mut out = String::with_capacity(haystack.len());
@@ -525,10 +525,10 @@ impl Regex {
     /// # Examples
     ///
     /// ```
-    /// use pregex::Regex;
+    /// use eregex::Regex;
     /// let re = Regex::new(r"\s+")?;
     /// assert_eq!(re.split("a  b c"), vec!["a", "b", "c"]);
-    /// # Ok::<(), pregex::Error>(())
+    /// # Ok::<(), eregex::Error>(())
     /// ```
     pub fn split(&self, haystack: &str) -> Vec<String> {
         self.split_iter(haystack).collect()

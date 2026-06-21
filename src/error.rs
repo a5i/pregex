@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-/// A specialized [`Result`] for pregex operations.
+/// A specialized [`Result`] for eregex operations.
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// The kind of error.
@@ -89,8 +89,8 @@ impl fmt::Display for Error {
             ErrorKind::Timeout => "regex timed out",
         };
         match self.position {
-            Some(p) => write!(f, "pregex error at position {p}: {msg}"),
-            None => write!(f, "pregex error: {msg}"),
+            Some(p) => write!(f, "eregex error at position {p}: {msg}"),
+            None => write!(f, "eregex error: {msg}"),
         }
     }
 }

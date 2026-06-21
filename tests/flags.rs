@@ -1,6 +1,6 @@
 //! Unit tests for flag bitset operations and module-level flag constants.
 
-use pregex::flags::{self, Flags};
+use eregex::flags::{self, Flags};
 
 #[test]
 fn flag_constants_distinct() {
@@ -104,7 +104,7 @@ fn bitwise_operators() {
 
 #[test]
 fn ascii_flag_changes_d_and_w() {
-    use pregex::Regex;
+    use eregex::Regex;
     // In ASCII mode \d does not match fullwidth digit.
     let r = Regex::new_with_flags(r"\d", flags::ASCII).unwrap();
     assert!(r.find("5").is_some());
@@ -116,7 +116,7 @@ fn ascii_flag_changes_d_and_w() {
 
 #[test]
 fn default_resolves_to_unicode_and_version1() {
-    use pregex::Regex;
+    use eregex::Regex;
     let r = Regex::new("a").unwrap();
     let f = r.flags();
     assert!(f.contains(flags::UNICODE), "UNICODE should default on");

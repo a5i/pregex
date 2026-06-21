@@ -1,4 +1,4 @@
-//! Gap-tolerant matching built on top of `pregex`.
+//! Gap-tolerant matching built on top of `eregex`.
 //!
 //! The engine matches patterns *contiguously*. Real-world inputs (OCR output,
 //! noisy logs) sometimes split an intended target across junk, e.g.
@@ -40,7 +40,7 @@
 //!   the original pattern. It can produce false positives at segment edges;
 //!   always re-validate the stitched result with the full pattern (we do).
 
-use pregex::{MatchStatus, Regex};
+use eregex::{MatchStatus, Regex};
 
 /// A decomposed target: ordered sub-patterns searched left-to-right.
 struct Segment {

@@ -53,18 +53,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: crates/pregex-node/package-lock.json
+          cache-dependency-path: crates/eregex-node/package-lock.json
 
       - name: Install dependencies
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm ci
 
       - name: Build native addon
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm run build
 
       - name: Test
-        working-directory: crates/pregex-node
+        working-directory: crates/eregex-node
         run: npm test
 
   python:
@@ -89,11 +89,11 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --manifest-path crates/pregex-python/Cargo.toml --out dist
+          args: --release --manifest-path crates/eregex-python/Cargo.toml --out dist
 
       - name: Install wheel
-        run: pip install --no-index --find-links dist pregex
+        run: pip install --no-index --find-links dist eregex
 
       - name: Test
-        working-directory: crates/pregex-python
-        run: python -m unittest test_pregex -v
+        working-directory: crates/eregex-python
+        run: python -m unittest test_eregex -v

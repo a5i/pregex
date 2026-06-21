@@ -29,7 +29,7 @@
 //! below use the engine-verified offsets and re-slice the gap/segments
 //! directly out of the haystack to make the disagreement explicit.
 
-use pregex::{MatchStatus, Regex};
+use eregex::{MatchStatus, Regex};
 
 fn re(p: &str) -> Regex {
     Regex::new(p).unwrap_or_else(|_| panic!("failed to compile {p:?}"))

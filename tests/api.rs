@@ -1,50 +1,50 @@
-//! The public module-level API surface of `pregex::*`.
+//! The public module-level API surface of `eregex::*`.
 
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 // --- module-level convenience functions -----------------------------------
 
 #[test]
 fn module_is_match() {
-    assert!(pregex::is_match(r"\d+", "abc 123"));
-    assert!(!pregex::is_match(r"\d+", "abc"));
+    assert!(eregex::is_match(r"\d+", "abc 123"));
+    assert!(!eregex::is_match(r"\d+", "abc"));
     // bad pattern -> false, not panic
-    assert!(!pregex::is_match(r"(abc", "abc"));
+    assert!(!eregex::is_match(r"(abc", "abc"));
 }
 
 #[test]
 fn module_find() {
-    let m = pregex::find(r"\w+", "  hello").unwrap();
+    let m = eregex::find(r"\w+", "  hello").unwrap();
     assert_eq!(m.as_str(), "hello");
-    assert!(pregex::find(r"\d", "no digits").is_none());
+    assert!(eregex::find(r"\d", "no digits").is_none());
 }
 
 #[test]
 fn module_find_all() {
-    let ms = pregex::find_all(r"\d", "a1b2c3").unwrap();
+    let ms = eregex::find_all(r"\d", "a1b2c3").unwrap();
     assert_eq!(ms.len(), 3);
     assert_eq!(ms[0].as_str(), "1");
-    let bad = pregex::find_all(r"(unclosed", "x");
+    let bad = eregex::find_all(r"(unclosed", "x");
     assert!(bad.is_err());
 }
 
 #[test]
 fn module_new_and_new_with_flags() {
-    let r = pregex::new(r"abc").unwrap();
+    let r = eregex::new(r"abc").unwrap();
     assert!(r.is_match("abc"));
-    let r = pregex::new_with_flags(r"abc", flags::IGNORECASE).unwrap();
+    let r = eregex::new_with_flags(r"abc", flags::IGNORECASE).unwrap();
     assert!(r.is_match("ABC"));
 }
 
 #[test]
 fn module_replace_and_replace_all() {
-    assert_eq!(pregex::replace(r"\d", "a1b", "X").unwrap(), "aXb");
-    assert_eq!(pregex::replace_all(r"\d", "a1b2", "X").unwrap(), "aXbX");
+    assert_eq!(eregex::replace(r"\d", "a1b", "X").unwrap(), "aXb");
+    assert_eq!(eregex::replace_all(r"\d", "a1b2", "X").unwrap(), "aXbX");
 }
 
 #[test]
 fn module_split() {
-    assert_eq!(pregex::split(r"\s", "a b c").unwrap(), vec!["a", "b", "c"]);
+    assert_eq!(eregex::split(r"\s", "a b c").unwrap(), vec!["a", "b", "c"]);
 }
 
 // --- Regex accessors ------------------------------------------------------

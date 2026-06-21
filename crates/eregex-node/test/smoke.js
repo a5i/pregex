@@ -20,7 +20,7 @@ assert.ok((reFlags.flags & P.IGNORECASE) !== 0, 'IGNORECASE is set in flags');
 assert.ok((new P.Regex('hello', P.parseFlags('i')).flags & P.IGNORECASE) !== 0, 'parseFlags("i") sets IGNORECASE');
 eq(P.parseFlags('im'), P.IGNORECASE | P.MULTILINE, 'parseFlags("im") raw bits');
 
-assert.throws(() => new P.Regex('('), /pregex/, 'bad pattern throws');
+assert.throws(() => new P.Regex('('), /eregex/, 'bad pattern throws');
 
 // --- find / group accessors -----------------------------------------------
 
@@ -102,4 +102,4 @@ eq(namedRe.groupNames().sort(), ['month', 'year'], 'groupNames');
 eq(namedRe.groupIndex('month'), 2, 'groupIndex');
 eq(namedRe.groupIndex('nope'), null, 'groupIndex missing');
 
-console.log('OK — all pregex-node smoke tests passed.');
+console.log('OK — all eregex-node smoke tests passed.');

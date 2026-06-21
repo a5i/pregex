@@ -1,6 +1,6 @@
 //! Integration tests exercising the parser + matcher end to end.
 
-use pregex::{Regex, flags};
+use eregex::{Regex, flags};
 
 fn re(p: &str) -> Regex {
     Regex::new(p).expect(&format!("failed to compile {p:?}"))
@@ -376,8 +376,8 @@ fn split_with_groups() {
 
 #[test]
 fn escape_helper() {
-    assert_eq!(pregex::escape("a.b"), r"a\.b");
-    assert_eq!(pregex::escape_special_only("a.b!"), r"a\.b!");
+    assert_eq!(eregex::escape("a.b"), r"a\.b");
+    assert_eq!(eregex::escape_special_only("a.b!"), r"a\.b!");
 }
 
 // --- error handling -------------------------------------------------------

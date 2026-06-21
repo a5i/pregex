@@ -1,7 +1,7 @@
 {
-  "name": "pregex",
-  "version": "0.1.0",
-  "description": "Node.js bindings for pregex, an advanced regular expression engine inspired by mrab-regex",
+  "name": "eregex",
+  "version": "0.1.1",
+  "description": "Node.js bindings for eregex, an advanced regular expression engine inspired by mrab-regex",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "Apache-2.0",
@@ -14,13 +14,13 @@
     "regex",
     "regular-expression",
     "mrab-regex",
-    "pregex",
+    "eregex",
     "text",
     "pattern",
     "native"
   ],
   "napi": {
-    "binaryName": "pregex"
+    "binaryName": "eregex"
   },
   "scripts": {
     "build": "napi build --release --platform",

@@ -1,6 +1,6 @@
-//! Tests for `pregex::escape` and its variants.
+//! Tests for `eregex::escape` and its variants.
 
-use pregex::escape;
+use eregex::escape;
 
 #[test]
 fn escape_metachars() {
@@ -14,7 +14,7 @@ fn escape_metachars() {
 
 #[test]
 fn escape_special_only() {
-    use pregex::escape_special_only;
+    use eregex::escape_special_only;
     // Only regex-special chars are escaped.
     assert_eq!(escape_special_only("a.b!"), r"a\.b!");
     // Space IS escaped under special_only (matches mrab's literal_spaces=False);
@@ -25,7 +25,7 @@ fn escape_special_only() {
 
 #[test]
 fn escape_literal_spaces() {
-    use pregex::escape_literal_spaces;
+    use eregex::escape_literal_spaces;
     // Spaces are preserved literally; metachars still escaped.
     assert_eq!(escape_literal_spaces("a b.c"), "a b\\.c");
     // Default escape would escape the space.

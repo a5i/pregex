@@ -1,13 +1,13 @@
 [package]
-name = "pregex"
-version = "0.1.0"
+name = "eregex"
+version.workspace = true
 edition = "2024"
 rust-version = "1.85"
-authors = ["pregex contributors"]
+authors = ["eregex contributors"]
 description = "An advanced regular expression engine for Rust, inspired by mrab-regex"
 license = "Apache-2.0"
 repository = "https://github.com/mrabarnett/mrab-regex"
-documentation = "https://docs.rs/pregex"
+documentation = "https://docs.rs/eregex"
 keywords = ["regex", "regular-expression", "text", "pattern", "fuzzy"]
 categories = ["text-processing"]
 readme = "README.md"
@@ -17,7 +17,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [lib]
-name = "pregex"
+name = "eregex"
 path = "src/lib.rs"
 
 [[example]]
@@ -29,8 +29,13 @@ default = []
 # Enable detailed per-node debug dumping of the compiled AST.
 trace = []
 
+# Single source of truth for the published version: every workspace member
+# inherits it via `version.workspace = true`.
+[workspace.package]
+version = "0.1.1"
+
 [workspace]
-members = ["crates/pregex-node", "crates/pregex-python"]
+members = ["crates/eregex-node", "crates/eregex-python"]
 
 # Native bindings (Node/Python) benefit from a tight release profile.
 [profile.release]
