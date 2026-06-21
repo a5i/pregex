@@ -44,5 +44,5 @@ Initial public surface of the engine:
   `is_match`, `find`, `find_at`, `find_iter`, `captures`, `captures_iter`,
   `match_at_start`, `fullmatch`, `replace`, `replace_all`, `split`, `escape`.
 
-[Unreleased]: https://github.com/mrabarnett/mrab-regex/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/mrabarnett/mrab-regex/releases/tag/v0.1.0
+[Unreleased]: https://github.com/a5i/eregex/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/a5i/eregex/releases/tag/v0.1.0

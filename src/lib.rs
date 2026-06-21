@@ -1,7 +1,7 @@
 //! `eregex` — an advanced regular expression engine for Rust.
 //!
 //! The full overview, quick-start guide, feature matrix and roadmap live in
-//! the [`README`](https://github.com/mrabarnett/mrab-regex#readme), which is
+//! the [`README`](https://github.com/a5i/eregex#readme), which is
 //! also rendered as this crate's documentation landing page (see below). For
 //! navigating the API, start with [`Regex`] for matching and [`Match`] for
 //! results, then see [`PartialMatch`] for end-anchored partial matching and

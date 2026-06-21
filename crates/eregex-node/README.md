@@ -1,6 +1,6 @@
 # eregex (Node.js bindings)
 
-Native Node.js bindings for [`eregex`](https://github.com/mrabarnett/mrab-regex) —
+Native Node.js bindings for [`eregex`](https://github.com/a5i/eregex) —
 an advanced regular expression engine for Rust inspired by mrab-regex (the
 Python `regex` module).
 

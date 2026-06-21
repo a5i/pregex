@@ -1,6 +1,6 @@
 # eregex (Python bindings)
 
-Python bindings for [`eregex`](https://github.com/mrabarnett/mrab-regex) — an
+Python bindings for [`eregex`](https://github.com/a5i/eregex) — an
 advanced regular expression engine for Rust inspired by mrab-regex (the Python
 `regex` module).
 
