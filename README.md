@@ -129,6 +129,22 @@ The [`examples/`](./examples) directory contains runnable programs:
 
 Run them with `cargo run --example demo` / `cargo run --example gap_match`.
 
+## Language bindings
+
+The Rust core is wrapped by three companion crates, each under `crates/`:
+
+| package            | technology                  | install                |
+| ------------------ | --------------------------- | ---------------------- |
+| `eregex` (npm)     | `napi-rs` (native addon)    | `npm i eregex`         |
+| `eregex-wasm` (npm)| `wasm-bindgen` / `wasm-pack`| `npm i eregex-wasm`    |
+| `eregex` (PyPI)    | `pyo3` / `maturin`          | `pip install eregex`   |
+
+The Node and WASM packages expose the **same JavaScript API** (`Regex`,
+`Match`, `PartialMatch`, the flag constants, `parseFlags`, …) and the same
+`null`-on-absent semantics, so they are interchangeable: pick the native
+build for raw speed, or the WASM build for a single portable binary that can
+also be rebuilt for bundlers / browsers (`wasm-pack build --target web`).
+
 ## Development
 
 A shared pre-commit hook runs `cargo fmt --all --check` and

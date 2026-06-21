@@ -1,6 +1,6 @@
 {
   "name": "eregex",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node.js bindings for eregex, an advanced regular expression engine inspired by mrab-regex",
   "main": "index.js",
   "types": "index.d.ts",

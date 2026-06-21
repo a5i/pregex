@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Bump the project version everywhere and keep all five manifests in sync.
+# Bump the project version everywhere and keep all six manifests in sync.
 #
-# The single source of truth for the three Rust crates is
+# The single source of truth for the four Rust crates is
 # `[workspace.package].version` in the root Cargo.toml; every member crate
 # uses `version.workspace = true`. This script updates that one line plus the
 # npm (package.json) and PyPI (pyproject.toml) versions, then refreshes the two
@@ -31,7 +31,7 @@ printf '%s' "$NEW" | grep -Eq \
 # Run from the repo root regardless of where the script is invoked from.
 cd "$(dirname "$0")/.."
 
-[ -f Cargo.toml ] && [ -d crates/eregex-node ] && [ -d crates/eregex-python ] \
+[ -f Cargo.toml ] && [ -d crates/eregex-node ] && [ -d crates/eregex-python ] && [ -d crates/eregex-wasm ] \
   || die "not running from a project root (expected Cargo.toml + crates/eregex-*)"
 
 # --- helper: portable in-place sed ----------------------------------------
@@ -50,7 +50,7 @@ printf 'bumping %s -> %s\n\n' "$OLD" "$NEW"
 
 # --- 1. Cargo (workspace source of truth) ---------------------------------
 # Only the root Cargo.toml carries a literal version now (under
-# [workspace.package]); both binding crates inherit it.
+# [workspace.package]); all three binding crates inherit it.
 
 inplace "s|^version = \".*\"|version = \"$NEW\"|" Cargo.toml
 
@@ -58,6 +58,12 @@ inplace "s|^version = \".*\"|version = \"$NEW\"|" Cargo.toml
 
 NODE=crates/eregex-node/package.json
 inplace "s|\"version\": \".*\"|\"version\": \"$NEW\"|" "$NODE"
+
+# The wasm dev package.json carries a cosmetic version too (the published
+# wasm package's version is stamped from Cargo by wasm-pack). Keep it in sync
+# so every manifest agrees.
+WASM=crates/eregex-wasm/package.json
+inplace "s|\"version\": \".*\"|\"version\": \"$NEW\"|" "$WASM"
 
 # --- 3. PyPI (pyproject.toml) ---------------------------------------------
 
@@ -83,17 +89,20 @@ CARGO_VERSIONS=$(cargo metadata --format-version 1 --no-deps \
   || die "cargo crates disagree on version:\n$CARGO_VERSIONS"
 
 NODE_V=$(grep -m1 '"version"' "$NODE" | sed 's/.*: "\(.*\)".*/\1/' | tr -d ',')
+WASM_V=$(grep -m1 '"version"' "$WASM" | sed 's/.*: "\(.*\)".*/\1/' | tr -d ',')
 PY_V=$(grep -m1 '^version =' "$PY" | sed 's/version = "\(.*\)"/\1/')
 LOCK_V=$(grep -m1 '"version"' crates/eregex-node/package-lock.json \
   | sed 's/.*: "\(.*\)".*/\1/' | tr -d ',')
 
 echo "cargo (all crates) = $CARGO_VERSIONS"
-echo "npm package.json   = $NODE_V"
+echo "npm node           = $NODE_V"
+echo "npm wasm           = $WASM_V"
 echo "npm package-lock   = $LOCK_V"
 echo "pypi pyproject     = $PY_V"
 
 [ "$CARGO_VERSIONS" = "$NEW" ] || die "cargo version is '$CARGO_VERSIONS', expected '$NEW'"
-[ "$NODE_V"          = "$NEW" ] || die "package.json is '$NODE_V', expected '$NEW'"
+[ "$NODE_V"          = "$NEW" ] || die "node package.json is '$NODE_V', expected '$NEW'"
+[ "$WASM_V"          = "$NEW" ] || die "wasm package.json is '$WASM_V', expected '$NEW'"
 [ "$LOCK_V"          = "$NEW" ] || die "package-lock.json is '$LOCK_V', expected '$NEW'"
 [ "$PY_V"            = "$NEW" ] || die "pyproject.toml is '$PY_V', expected '$NEW'"
 

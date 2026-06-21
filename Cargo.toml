@@ -32,10 +32,10 @@ trace = []
 # Single source of truth for the published version: every workspace member
 # inherits it via `version.workspace = true`.
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 
 [workspace]
-members = ["crates/eregex-node", "crates/eregex-python"]
+members = ["crates/eregex-node", "crates/eregex-python", "crates/eregex-wasm"]
 
 # Native bindings (Node/Python) benefit from a tight release profile.
 [profile.release]

@@ -1,0 +1,6 @@
+# wasm-pack output (the assembled publishable package).
+/pkg/
+
+# Node tooling (this crate currently has no runtime npm dependencies).
+/node_modules/
+/package-lock.json

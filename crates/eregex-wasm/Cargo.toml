@@ -1,0 +1,21 @@
+[package]
+name = "eregex-wasm"
+version.workspace = true
+edition = "2021"
+rust-version = "1.85"
+authors = ["eregex contributors"]
+description = "WebAssembly bindings for eregex, an advanced regular expression engine inspired by mrab-regex"
+license = "Apache-2.0"
+repository = "https://github.com/a5i/eregex"
+keywords = ["regex", "regular-expression", "mrab-regex", "eregex", "wasm"]
+categories = ["text-processing", "wasm"]
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+eregex = { path = "../..", version = "0.1.0" }
+wasm-bindgen = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"

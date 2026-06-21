@@ -97,3 +97,30 @@ jobs:
       - name: Test
         working-directory: crates/eregex-python
         run: python -m unittest test_eregex -v
+
+  wasm:
+    name: WASM (nodejs target)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --locked
+
+      - name: Build WASM package
+        working-directory: crates/eregex-wasm
+        run: npm run build
+
+      - name: Test
+        working-directory: crates/eregex-wasm
+        run: npm test

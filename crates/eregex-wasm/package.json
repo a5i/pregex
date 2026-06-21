@@ -1,0 +1,16 @@
+{
+  "name": "eregex-wasm",
+  "version": "0.1.2",
+  "description": "WebAssembly bindings for eregex, an advanced regular expression engine inspired by mrab-regex",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "wasm-pack build --target nodejs --release && node scripts/assemble-pkg.cjs",
+    "build:debug": "wasm-pack build --target nodejs --dev && node scripts/assemble-pkg.cjs",
+    "test": "node test/smoke.js",
+    "test:all": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=10"
+  }
+}
