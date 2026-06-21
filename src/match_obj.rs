@@ -255,3 +255,104 @@ impl<'r, 'h> Iterator for FindIter<'r, 'h> {
 /// Iterator that yields [`Match`] objects with full capture state (an alias of
 /// [`FindIter`] in this implementation, since matches always carry captures).
 pub type CaptureMatches<'r, 'h> = FindIter<'r, 'h>;
+
+// ---------------------------------------------------------------------------
+// Partial matching
+// ---------------------------------------------------------------------------
+
+/// The outcome kind of a [`Regex::find_partial`](crate::Regex::find_partial)
+/// attempt. `NoMatch` is represented by `Option::<PartialMatch>::None`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MatchStatus {
+    /// The pattern matched and consumed the input all the way to its end.
+    Full,
+    /// The input is a prefix of some full match: the pattern consumed to the
+    /// end of input but still wanted more. Equivalently, a consuming leaf was
+    /// blocked solely by end-of-input.
+    Partial,
+}
+
+/// The state of a single group within a [`PartialMatch`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum GroupMatch<'h> {
+    /// The group fully matched (its body completed).
+    Matched(&'h str),
+    /// The group was entered but its body did not complete before input ended.
+    Partial(&'h str),
+    /// The group never participated.
+    None,
+}
+
+/// A partial (or full) match produced by
+/// [`Regex::find_partial`](crate::Regex::find_partial).
+///
+/// The match is *end-anchored*: it always ends exactly at the end of the
+/// haystack. `status` distinguishes a fully-satisfied match from one that was
+/// cut short by end-of-input.
+pub struct PartialMatch<'h> {
+    /// Whether the match is fully satisfied (`Full`) or cut short (`Partial`).
+    pub status: MatchStatus,
+    /// The whole matched text.
+    pub matched: &'h str,
+    /// Byte offset where the match starts.
+    pub start: usize,
+    /// Byte offset where the match ends (always the haystack length).
+    pub end: usize,
+    /// Per-group state; index 0 is the whole match, 1.. are the capturing
+    /// groups in order.
+    pub groups: Vec<GroupMatch<'h>>,
+    /// Group-name → index map (for [`PartialMatch::name`]).
+    pub(crate) names: HashMap<String, usize>,
+}
+
+impl<'h> PartialMatch<'h> {
+    /// `true` if [`status`](Self::status) is [`MatchStatus::Full`].
+    pub fn is_full(&self) -> bool {
+        matches!(self.status, MatchStatus::Full)
+    }
+
+    /// `true` if [`status`](Self::status) is [`MatchStatus::Partial`].
+    pub fn is_partial(&self) -> bool {
+        matches!(self.status, MatchStatus::Partial)
+    }
+
+    /// The text of group `g` (1-based), whether matched or partial. `None` if
+    /// the group did not participate.
+    pub fn group(&self, g: usize) -> Option<&'h str> {
+        match self.groups.get(g)? {
+            GroupMatch::Matched(s) | GroupMatch::Partial(s) => Some(*s),
+            GroupMatch::None => None,
+        }
+    }
+
+    /// The text of a named group, whether matched or partial.
+    pub fn name(&self, name: &str) -> Option<&'h str> {
+        let g = *self.names.get(name)?;
+        self.group(g)
+    }
+
+    /// Whether group `g` (1-based) is fully matched.
+    pub fn group_matched(&self, g: usize) -> bool {
+        matches!(self.groups.get(g), Some(GroupMatch::Matched(_)))
+    }
+
+    /// Whether group `g` (1-based) is partial (entered but not completed).
+    pub fn group_partial(&self, g: usize) -> bool {
+        matches!(self.groups.get(g), Some(GroupMatch::Partial(_)))
+    }
+
+    /// Whether group `g` (1-based) never participated.
+    pub fn group_none(&self, g: usize) -> bool {
+        matches!(self.groups.get(g), Some(GroupMatch::None) | None)
+    }
+}
+
+impl<'h> std::fmt::Debug for PartialMatch<'h> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "PartialMatch {:?} status={:?} span={}..{}",
+            self.matched, self.status, self.start, self.end
+        )
+    }
+}

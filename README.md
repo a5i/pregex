@@ -38,6 +38,18 @@ assert!(re.is_match("HELLO, World"));
 let re = Regex::new(r"(\w)+").unwrap();
 let m = re.find("abc").unwrap();
 assert_eq!(m.captures(1), vec![Some("a"), Some("b"), Some("c")]);
+
+// Partial matching: is the input a prefix of some full match?
+let re = Regex::new(r"token=([a-z]+)([0-9]+)").unwrap();
+// "token=abc" is incomplete — more input could turn it into a full match.
+let p = re.find_partial("xxx token=abc").unwrap();
+assert!(p.is_partial());
+assert_eq!(p.matched, "token=abc");
+// Group 1 fully matched, group 2 is still empty/partial.
+assert_eq!(p.group(1), Some("abc"));
+assert_eq!(p.group(2), Some(""));
+// A wrong character rules out any continuation -> no match at all.
+assert!(re.find_partial("xxx token=abc!").is_none());
 ```
 
 ## Feature status
@@ -53,11 +65,12 @@ assert_eq!(m.captures(1), vec![Some("a"), Some("b"), Some("c")]);
 * Atomic groups `(?>...)`
 * Backreferences `\1 \g<n> \g<name> (?P=name)`
 * Lookahead / lookbehind `(?=...) (?!...) (?<=...) (?<!...)` (variable length)
+* Partial (end-anchored) matching via `find_partial`
 * Inline scoped flags `(?i) (?i:...) (?i-m:...)`
 * Inline comments `(?#...)` and free-spacing (`VERBOSE`)
 * Named & unicode properties `\p{...}` (a curated subset)
 * Repeated captures (`captures`, `captures_iter`)
-* `is_match`, `find`, `find_at`, `find_iter`, `captures`, `captures_iter`
+* `is_match`, `find`, `find_at`, `find_iter`, `find_partial`, `captures`, `captures_iter`
 * `replace`, `replace_all` with `$1` / `${name}` / `$$` templates
 * `split`, `split_iter`
 * `escape`
@@ -71,7 +84,7 @@ assert_eq!(m.captures(1), vec![Some("a"), Some("b"), Some("c")]);
 * Full Unicode case-folding (ß ↔ ss); currently simple casefolding
 * `\K`, `(*PRUNE)`, `(*SKIP)`, `(*FAIL)`, `\G` semantics
 * POSIX (`leftmost-longest`) and reverse (`(?r)`) matching modes
-* Partial matching, concurrent/GIL-free, timeouts
+* Concurrent/GIL-free operation, timeouts
 * `\L<name>` named lists
 
 ## License

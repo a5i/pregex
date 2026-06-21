@@ -6,7 +6,7 @@ use crate::ast::Node;
 use crate::error::Result;
 use crate::flags::Flags;
 use crate::matcher;
-use crate::match_obj::{FindIter, Match};
+use crate::match_obj::{FindIter, GroupMatch, Match, MatchStatus, PartialMatch};
 use crate::state::State;
 
 /// A compiled regular expression.
@@ -187,6 +187,106 @@ impl Regex {
     /// Iterate over non-overlapping matches (alias of [`find_iter`](Self::find_iter)).
     pub fn captures_iter<'r, 'h>(&'r self, haystack: &'h str) -> FindIter<'r, 'h> {
         self.find_iter(haystack)
+    }
+
+    /// Partial / end-anchored match.
+    ///
+    /// Unlike [`find`](Self::find), the match must consume the haystack all the
+    /// way to its end. The result is:
+    ///
+    /// * `None` — the input cannot be a prefix of any match (a hard mismatch
+    ///   occurred before end-of-input), or nothing matched at all.
+    /// * `Some(Full)` — the pattern matched and consumed the entire haystack.
+    /// * `Some(Partial)` — the pattern consumed the entire haystack but was
+    ///   still asking for more input; in other words, the haystack is a prefix
+    ///   of some full match.
+    ///
+    /// Group state within a [`PartialMatch`] distinguishes groups that
+    /// completed ([`GroupMatch::Matched`]) from the group that was entered but
+    /// not completed ([`GroupMatch::Partial`]).
+    pub fn find_partial<'h>(&self, haystack: &'h str) -> Option<PartialMatch<'h>> {
+        let mut st = self.build_state(haystack);
+        let n = st.len();
+        let char_to_byte = st.char_to_byte.clone();
+        for start in 0..=n {
+            st.reset_for_search(start);
+            st.partial_mode = true;
+            if matcher::try_match_to(&self.ast, &mut st, n) {
+                st.caps[0] = Some((start, n));
+                // Represent the completed match as a candidate with no open
+                // groups, so build_partial_match has a single code path.
+                let full = crate::state::PartialCandidate {
+                    end: n,
+                    completed: st.caps.iter().filter(|c| c.is_some()).count(),
+                    caps: st.caps.clone(),
+                    open: Vec::new(),
+                };
+                return Some(self.build_partial_match(
+                    haystack,
+                    &char_to_byte,
+                    MatchStatus::Full,
+                    start,
+                    n,
+                    &full,
+                ));
+            }
+            if let Some(cand) = st.partial_best.take() {
+                // Partial blocks only ever happen at end-of-input, i.e. at `n`.
+                // Require a non-empty match (something was actually consumed).
+                if cand.end == n && n > start {
+                    return Some(self.build_partial_match(
+                        haystack,
+                        &char_to_byte,
+                        MatchStatus::Partial,
+                        start,
+                        cand.end,
+                        &cand,
+                    ));
+                }
+            }
+        }
+        None
+    }
+
+    /// Build a [`PartialMatch`] from a [`PartialCandidate`].
+    fn build_partial_match<'h>(
+        &self,
+        haystack: &'h str,
+        char_to_byte: &[usize],
+        status: MatchStatus,
+        start_char: usize,
+        end_char: usize,
+        cand: &crate::state::PartialCandidate,
+    ) -> PartialMatch<'h> {
+        let bs = char_to_byte[start_char];
+        let be = char_to_byte[end_char];
+        let matched = &haystack[bs..be];
+        let groups = (0..=self.n_groups)
+            .map(|g| {
+                if g == 0 {
+                    // Group 0 is the whole (consumed) match.
+                    return GroupMatch::Matched(matched);
+                }
+                // A partial (open) group wins over a completed capture — this
+                // matters for repeated groups whose last iteration is partial.
+                if let Some(&(_, gstart)) = cand.open.iter().rev().find(|(idx, _)| *idx == g) {
+                    let gs = char_to_byte[gstart];
+                    return GroupMatch::Partial(&haystack[gs..be]);
+                }
+                if let Some(Some((s, e))) = cand.caps.get(g).copied() {
+                    return GroupMatch::Matched(&haystack[char_to_byte[s]..char_to_byte[e]]);
+                }
+                GroupMatch::None
+            })
+            .collect();
+        PartialMatch {
+            status,
+            matched,
+            start: bs,
+            end: be,
+            groups,
+            names: self.names_clone(),
+        }
     }
 
     // -- substitution / splitting -----------------------------------------

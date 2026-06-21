@@ -37,7 +37,7 @@ mod state;
 pub use error::{Error, Result};
 pub use escape::{escape, escape_literal_spaces, escape_special_only};
 pub use flags::Flags;
-pub use match_obj::{CaptureMatches, FindIter, Match};
+pub use match_obj::{CaptureMatches, FindIter, GroupMatch, Match, MatchStatus, PartialMatch};
 pub use regex::Regex;
 
 // ---------------------------------------------------------------------------

@@ -387,3 +387,121 @@ fn bad_escape_errors() {
 fn nothing_to_repeat_errors() {
     assert!(Regex::new("*abc").is_err());
 }
+
+// --- cases derived from .local/test-cases.md (full-match subset) ---------
+//
+// The companion file describes a future *partial* matching API. The cases
+// below are the subset that the current (full-match-only) engine can already
+// express. Partial-only variants live in `tests/partial.rs` behind
+// `#[ignore]`.
+
+// #6 — full match with two capture groups inside a longer string.
+#[test]
+fn tc06_full_match_inside_long_string() {
+    let r = re(r"token=([a-z]+)([0-9]+)");
+    let m = r.find("xxx token=abc123 yyy").unwrap();
+    assert_eq!(m.as_str(), "token=abc123");
+    assert_eq!(m.start(), 4);
+    assert_eq!(m.end(), 16);
+    assert_eq!(m.group(1), Some("abc"));
+    assert_eq!(m.group(2), Some("123"));
+}
+
+// #7 — no full match, and the engine must not report a spurious partial.
+#[test]
+fn tc07_no_match_anywhere() {
+    let r = re(r"token=([a-z]+)([0-9]+)");
+    // "tok=" can never become "token=", and there is no other start.
+    assert!(r.find("xxx tok=abc123 yyy").is_none());
+    assert!(!r.is_match("xxx tok=abc123 yyy"));
+}
+
+// #11A — alternation where the shorter branch is already a complete match.
+// Leftmost-first semantics: `stop` wins before `stopped` is tried.
+#[test]
+fn tc11a_alternation_short_branch_full() {
+    let r = re(r"cmd=(stop|stopped)");
+    let m = r.find("cmd=stop").unwrap();
+    assert_eq!(m.as_str(), "cmd=stop");
+    assert_eq!(m.group(1), Some("stop"));
+}
+
+// #15 — search must return the first *full* match, not a later partial one.
+#[test]
+fn tc15_search_picks_first_full_match() {
+    let r = re(r"id=([0-9]{3})");
+    let m = r.find("id=123 other id=45").unwrap();
+    assert_eq!(m.as_str(), "id=123");
+    assert_eq!(m.group(1), Some("123"));
+}
+
+// #15 (find_iter) — incomplete trailing candidate is skipped entirely.
+#[test]
+fn tc15_find_iter_skips_incomplete() {
+    let r = re(r"id=([0-9]{3})");
+    let ms: Vec<_> = r
+        .find_iter("id=123 other id=45")
+        .map(|m| m.as_str().to_string())
+        .collect();
+    assert_eq!(ms, vec!["id=123"]);
+}
+
+// #18 — full word between word boundaries.
+#[test]
+fn tc18_word_boundary_full_word() {
+    let r = re(r"\bhello\b");
+    let m = r.find("say hello").unwrap();
+    assert_eq!(m.as_str(), "hello");
+    assert_eq!(m.start(), 4);
+    assert_eq!(m.end(), 9);
+}
+
+// #20 — full URL match with an optional path group participating.
+#[test]
+fn tc20_url_full_with_optional_path() {
+    let r = re(r"https://([a-z0-9.-]+)(/[a-z0-9/_-]+)?");
+    let m = r.find("open https://example.com/api/us").unwrap();
+    assert_eq!(m.as_str(), "https://example.com/api/us");
+    assert_eq!(m.start(), 5);
+    assert_eq!(m.group(1), Some("example.com"));
+    assert_eq!(m.group(2), Some("/api/us"));
+}
+
+// #25 — optional group that did not start: its slot stays `None`.
+#[test]
+fn tc25_optional_group_not_started() {
+    let r = re(r"user:([a-z]+)(?: role=([a-z]+))?");
+    let m = r.find("user:alice").unwrap();
+    assert_eq!(m.as_str(), "user:alice");
+    assert_eq!(m.group(1), Some("alice"));
+    assert_eq!(m.group(2), None);
+}
+
+// #29 — anchored pattern that reaches the end of input.
+#[test]
+fn tc29_anchored_end_full_match() {
+    let r = re(r"code=([A-Z]{3})$");
+    let m = r.find("code=ABC").unwrap();
+    assert_eq!(m.as_str(), "code=ABC");
+    assert_eq!(m.group(1), Some("ABC"));
+}
+
+// #12 (full-match half) — repeated capture of the separator group.
+#[test]
+fn tc12_repetition_full_list() {
+    let r = re(r"ids: ([0-9]{3})(,[0-9]{3})*");
+    let m = r.find("ids: 123,456,789").unwrap();
+    assert_eq!(m.as_str(), "ids: 123,456,789");
+    assert_eq!(m.group(1), Some("123"));
+    // group 2 is the last capture; captures(2) keeps the full history.
+    assert_eq!(m.captures(2), vec![Some(",456"), Some(",789")]);
+}
+
+// #23 (full-match half) — named groups with alternation, fully satisfied.
+#[test]
+fn tc23_named_groups_alternation_full() {
+    let r = re(r"user=(?P<user>[a-z]+) action=(?P<action>login|logout)");
+    let m = r.find("event user=alice action=login").unwrap();
+    assert_eq!(m.name("user"), Some("alice"));
+    assert_eq!(m.name("action"), Some("login"));
+}

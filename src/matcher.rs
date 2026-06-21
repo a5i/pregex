@@ -83,6 +83,9 @@ fn m_lit<'p>(ch: char, ign: bool, st: &mut State, k: &Cont<'p>) -> bool {
         _ => false,
     };
     if !matches {
+        if st.partial_mode && st.cur().is_none() {
+            st.record_partial_block();
+        }
         return false;
     }
     st.pos += 1;
@@ -103,6 +106,9 @@ fn m_litstr<'p>(chars: &[char], ign: bool, st: &mut State, k: &Cont<'p>) -> bool
             _ => false,
         };
         if !ok {
+            if st.partial_mode && st.cur().is_none() {
+                st.record_partial_block();
+            }
             st.pos = start;
             return false;
         }
@@ -122,6 +128,9 @@ fn m_any<'p>(dotall: bool, st: &mut State, k: &Cont<'p>) -> bool {
         None => false,
     };
     if !ok {
+        if st.partial_mode && st.cur().is_none() {
+            st.record_partial_block();
+        }
         return false;
     }
     st.pos += 1;
@@ -135,6 +144,9 @@ fn m_any<'p>(dotall: bool, st: &mut State, k: &Cont<'p>) -> bool {
 
 fn m_class<'p>(cc: &crate::ast::CharClass, st: &mut State, k: &Cont<'p>) -> bool {
     let Some(c) = st.cur() else {
+        if st.partial_mode {
+            st.record_partial_block();
+        }
         return false;
     };
     if !cc.matches(c) {
@@ -151,6 +163,9 @@ fn m_class<'p>(cc: &crate::ast::CharClass, st: &mut State, k: &Cont<'p>) -> bool
 
 fn m_predef<'p>(kind: Predef, negated: bool, ascii: bool, st: &mut State, k: &Cont<'p>) -> bool {
     let Some(c) = st.cur() else {
+        if st.partial_mode {
+            st.record_partial_block();
+        }
         return false;
     };
     let pred = match kind {
@@ -172,6 +187,9 @@ fn m_predef<'p>(kind: Predef, negated: bool, ascii: bool, st: &mut State, k: &Co
 
 fn m_prop<'p>(pred: unicode::PropFn, negated: bool, st: &mut State, k: &Cont<'p>) -> bool {
     let Some(c) = st.cur() else {
+        if st.partial_mode {
+            st.record_partial_block();
+        }
         return false;
     };
     if pred(c) == negated {
@@ -241,6 +259,9 @@ fn m_word_edge<'p>(end: bool, ascii: bool, st: &mut State, k: &Cont<'p>) -> bool
 /// is a roadmap item.)
 fn m_grapheme<'p>(st: &mut State, k: &Cont<'p>) -> bool {
     if st.cur().is_none() {
+        if st.partial_mode {
+            st.record_partial_block();
+        }
         return false;
     }
     st.pos += 1;
@@ -254,13 +275,29 @@ fn m_grapheme<'p>(st: &mut State, k: &Cont<'p>) -> bool {
 
 fn m_group<'p>(index: usize, node: &'p Node, st: &mut State, k: &Cont<'p>) -> bool {
     let start = st.pos;
+    st.open_groups.push((index, start));
     let idx = index;
     let kc = k.clone();
     let close: Cont<'p> = Rc::new(move |st: &mut State| {
+        // On a successful body completion, drop our entry (it is on top —
+        // closes fire innermost-first) before closing, so any later
+        // partial-block recorded downstream does not falsely include us.
+        if st.open_groups.last().map(|&(i, _)| i == idx).unwrap_or(false) {
+            st.open_groups.pop();
+        }
         st.close_group(idx, start);
         kc(st)
     });
-    m_node(node, st, &close)
+    let r = m_node(node, st, &close);
+    if !r {
+        // The whole group attempt failed. Choice points inside the body will
+        // have restored `open_groups` via snapshots taken after our push, so
+        // our entry is typically still on top here — drop it if so.
+        if st.open_groups.last().map(|&(i, _)| i == index).unwrap_or(false) {
+            st.open_groups.pop();
+        }
+    }
+    r
 }
 
 fn m_atomic<'p>(node: &'p Node, st: &mut State, k: &Cont<'p>) -> bool {
@@ -386,6 +423,9 @@ fn m_backref<'p>(group: usize, ign: bool, st: &mut State, k: &Cont<'p>) -> bool 
             _ => false,
         };
         if !ok {
+            if st.partial_mode && st.cur().is_none() {
+                st.record_partial_block();
+            }
             st.pos = start;
             return false;
         }
