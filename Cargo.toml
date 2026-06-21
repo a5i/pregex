@@ -1,0 +1,24 @@
+[package]
+name = "pregex"
+version = "0.1.0"
+edition = "2024"
+authors = ["pregex contributors"]
+description = "An advanced regular expression engine for Rust, inspired by mrab-regex"
+license = "Apache-2.0"
+repository = "https://github.com/mrabarnett/mrab-regex"
+keywords = ["regex", "regular-expression", "text", "pattern", "fuzzy"]
+categories = ["text-processing"]
+readme = "README.md"
+
+[lib]
+name = "pregex"
+path = "src/lib.rs"
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
+
+[features]
+default = []
+# Enable detailed per-node debug dumping of the compiled AST.
+trace = []
